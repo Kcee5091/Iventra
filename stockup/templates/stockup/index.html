@@ -1,0 +1,293 @@
+{% extends "stockup/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - StockUp{% endblock %}
+
+{% block header_actions %}
+<a href="{%url 'create'%}" class="btn btn-dark btn-sm">
+    <i class="bi bi-plus-lg"></i> Add Product
+</a>
+{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        background: #f8f9fa;
+        color: #171717;
+    }
+
+    .dashboard {
+        max-width: 1200px;
+        margin: auto;
+        padding: 25px 20px;
+    }
+
+    .revenue-card {
+        background: #e8f5ef;
+        border: none;
+        border-radius: 16px;
+        padding: 30px;
+    }
+
+    .revenue-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -1px;
+    }
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 14px;
+        padding: 22px;
+        height: 100%;
+        transition: 0.2s;
+    }
+
+    .summary-card:hover {
+        border-color: #bdbdbd;
+        transform: translateY(-2px);
+    }
+
+    .summary-icon {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .summary-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 8px 0;
+    }
+
+    .low-stock {
+        color: #962b2b;
+    }
+
+    .dashboard-section {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .section-heading {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .sale-row {
+        padding: 17px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sale-row:last-child {
+        border-bottom: none;
+    }
+
+    .muted-text {
+        color: #777;
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 576px) {
+        .dashboard {
+            padding: 18px 12px;
+        }
+
+        .revenue-card {
+            padding: 22px;
+        }
+
+        .revenue-amount {
+            font-size: 2rem;
+        }
+
+        .summary-card {
+            padding: 17px;
+        }
+    }
+</style>
+
+<div class="dashboard">
+
+    <!-- Revenue Hero -->
+    <section class="revenue-card mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <p class="text-secondary mb-2">Today's Revenue</p>
+
+                <h1 class="revenue-amount mb-2">
+                    ₦{{ today_revenue|floatformat:2 }}
+                </h1>
+
+                <p class="text-secondary mb-0">
+                    Total money generated today
+                </p>
+            </div>
+
+            <i class="bi bi-wallet2 fs-1 text-success"></i>
+        </div>
+    </section>
+
+
+    <!-- Four Summary Cards -->
+    <section class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'products' %}" class="text-decoration-none text-dark">
+                <div class="summary-card">
+                    <i class="bi bi-box-seam summary-icon"></i>
+
+                    <p class="text-secondary mb-1">Total Products</p>
+
+                    <h2 class="summary-value">{{ total_product }}</h2>
+                    <p class="muted-text mb-0">Active products</p>
+            
+                </div>
+            </a>    
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+            <div class="summary-card">
+                <i class="bi bi-cart3 summary-icon"></i>
+
+                <p class="text-secondary mb-1">Sales Today</p>
+
+                <h2 class="summary-value">{{ today_sales }}</h2>
+
+                <p class="muted-text mb-0">Transactions</p>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+            <div class="summary-card">
+                <i class="bi bi-boxes summary-icon"></i>
+
+                <p class="text-secondary mb-1">Stock Remaining</p>
+
+                <h2 class="summary-value">{{ total_stocks }}</h2>
+
+                <p class="muted-text mb-0">Total units</p>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'lowstock' %}" class="text-decoration-none text-dark">
+                <div class="summary-card">
+                    <i class="bi bi-exclamation-triangle summary-icon low-stock"></i>
+
+                    <p class="text-secondary mb-1">Low Stock</p>
+
+                    <h2 class="summary-value low-stock">{{ low_stock }}</h2>
+
+                    <p class="muted-text mb-0">Items to restock</p>
+                </div>
+            </a>
+        </div>
+
+    </section>
+
+
+    <!-- Recent Sales -->
+    <section class="dashboard-section mb-4">
+
+        <div class="section-heading">
+            <h5 class="fw-bold mb-1">Recent Sales</h5>
+            <p class="muted-text mb-0">Your latest transactions</p>
+        </div>
+
+        {% for sale in recent_sales %}
+
+        <div class="sale-row d-flex justify-content-between align-items-center">
+
+            <div>
+                <h6 class="fw-semibold mb-1">
+                    {{ sale.product.product_name }}
+                </h6>
+
+                <p class="muted-text mb-0">
+                    {{ sale.created_at|date:"M d, Y - h:i A" }}
+                </p>
+            </div>
+
+            <div class="text-end">
+                <p class="fw-semibold mb-0">
+                    {{ sale.quantity }} units
+                </p>
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="p-4 text-center text-secondary">
+            No sales recorded yet.
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+
+    <!-- Sales History -->
+    <section class="dashboard-section mb-4">
+
+        <div class="section-heading d-flex justify-content-between align-items-center">
+
+            <div>
+                <h5 class="fw-bold mb-1">Sales History</h5>
+
+                <p class="muted-text mb-0">
+                    View your complete sales records
+                </p>
+            </div>
+
+            <i class="bi bi-clock-history fs-3"></i>
+
+        </div>
+
+        {% for sale in history %}
+
+        <div class="sale-row d-flex justify-content-between align-items-center">
+
+            <div>
+                <h6 class="fw-semibold mb-1">
+                    {{ sale.product.product_name }}
+                </h6>
+
+                <p class="muted-text mb-0">
+                    {{ sale.created_at|date:"M d, Y - h:i A" }}
+                </p>
+            </div>
+
+            <p class="mb-0 fw-semibold">
+                {{ sale.quantity }} units
+            </p>
+
+        </div>
+
+        {% empty %}
+
+        <div class="p-4 text-center text-secondary">
+            No sales history available.
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+
+    <!-- Create Product 
+    <section id="create-product">
+        {% include 'stockup/create.html' %}
+    </section> -->
+    
+
+</div>
+
+{% endblock %}

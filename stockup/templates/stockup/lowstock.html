@@ -1,0 +1,33 @@
+{% extends "stockup/base.html" %}
+{% load static %}
+
+
+{%block content%}
+ <h1> Low Stock Items</h1>
+
+    <!-- 1. Check if there are actually any low stock products -->
+    {% if products %}
+        <table  cellpadding="10">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Current Quantity</th>
+                    <th>Low Stock Threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 2. Loop through each low stock product -->
+                {% for product in products %}
+                    <tr>
+                        <td><strong>{{ product.product_name }}</strong></td>
+                        <td>{{ product.quantity }}</td>
+                        <td>{{ product.is_low_stock }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <!-- 3. Fallback message if everything is fully stocked -->
+        <p>🎉 All items are well stocked! No low stock alerts.</p>
+    {% endif %}
+{%endblock%}

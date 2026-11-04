@@ -1,0 +1,358 @@
+{% extends "stockup/base.html" %}
+{% load static %}
+
+{% block title %}Product Details | StockUp{% endblock %}
+
+{% block header_actions %}
+<div class="container pt-4">
+    <a href="{% url 'products' %}"
+       class="text-decoration-none text-secondary small">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Products
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .detail-wrapper {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .detail-card {
+        border: 1px solid #e9eaec;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .product-icon {
+        width: 65px;
+        height: 65px;
+        border-radius: 12px;
+        background: #f1f2f4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #777;
+        flex-shrink: 0;
+    }
+
+    .detail-label {
+        color: #777d87;
+        font-size: 13px;
+    }
+
+    .detail-number {
+        font-size: 30px;
+        font-weight: 700;
+        color: #17191d;
+    }
+
+    .detail-card form p {
+        margin-bottom: 15px;
+    }
+
+    .detail-card form label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+    }
+
+    .detail-card form input,
+    .detail-card form select,
+    .detail-card form textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 7px;
+        font-size: 14px;
+    }
+
+    .detail-card form input:focus,
+    .detail-card form select:focus,
+    .detail-card form textarea:focus {
+        outline: none;
+        border-color: #777;
+        box-shadow: 0 0 0 2px rgba(0,0,0,.05);
+    }
+</style>
+
+<div class="container py-4">
+<div class="detail-wrapper">
+
+    <!-- Product Overview -->
+    <div class="detail-card p-4 mb-4">
+
+        <div class="d-flex flex-column flex-sm-row
+                    justify-content-between gap-3">
+
+            <div class="d-flex gap-3 align-items-start">
+
+                <div class="product-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+                    <p class="detail-label mb-1">Product Details</p>
+
+                    <h3 class="fw-bold mb-1">
+                        {{ product.product_name }}
+                    </h3>
+
+                    <p class="text-muted small mb-2">
+                        {{ product.category }}
+                    </p>
+
+                    {% if product.quantity == 0 %}
+                        <span class="badge bg-danger-subtle text-danger">
+                            Out of Stock
+                        </span>
+                    {% elif is_low_stock %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis">
+                            Low Stock
+                        </span>
+                    {% else %}
+                        <span class="badge bg-success-subtle text-success">
+                            In Stock
+                        </span>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div class="text-sm-end">
+                <p class="detail-label mb-1">Selling Price</p>
+                <h2 class="fw-bold mb-0">
+                    ₦{{ product.price|floatformat:2 }}
+                </h2>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Stock Information -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6">
+            <div class="detail-card p-3 p-sm-4 h-100">
+                <p class="detail-label mb-2">Available Stock</p>
+
+                <h2 class="detail-number mb-1">
+                    {{ product.quantity }}
+                </h2>
+
+                <small class="text-muted">Units remaining</small>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="detail-card p-3 p-sm-4 h-100">
+                <p class="detail-label mb-2">Low Stock Threshold</p>
+
+                <h2 class="detail-number mb-1">
+                    {{ product.is_low_stock }}
+                </h2>
+
+                <small class="text-muted">Minimum stock level</small>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Product Information -->
+    <div class="detail-card p-4 mb-4">
+
+        <h5 class="fw-bold mb-3">Product Information</h5>
+
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="detail-label">Product Name</span>
+            <span class="small fw-medium">{{ product.product_name }}</span>
+        </div>
+
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="detail-label">Category</span>
+            <span class="small fw-medium">{{ product.category }}</span>
+        </div>
+
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="detail-label">Selling Price</span>
+            <span class="small fw-medium">
+                ₦{{ product.price|floatformat:2 }}
+            </span>
+        </div>
+
+        <div class="d-flex justify-content-between py-2">
+            <span class="detail-label">Date Added</span>
+            <span class="small fw-medium">
+                {{ product.created_at|date:"M d, Y" }}
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- Product Actions -->
+    <div class="row g-3 mb-4">
+
+        <!-- Edit Product -->
+       
+        <div class="detail-card p-4 h-100">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-pencil-square"></i>
+        <h6 class="fw-semibold mb-0">Edit Product</h6>
+    </div>
+
+    <button type="button" id="show-edit-form" class="btn btn-outline-dark w-100">
+        <i class="bi bi-pencil me-2"></i>
+        Edit Product
+    </button>
+
+    <div id="edit-form-container" class="d-none mt-3" data-has-errors="{{ form2.errors|yesno:'true,false' }}">
+        <form method="POST" action="{% url 'edit' product.id %}">
+            {% csrf_token %}
+            {{ form2.as_p }}
+
+            <button type="submit" class="btn btn-dark w-100 mt-2">
+                Save Changes
+            </button>
+        </form>
+
+        <button type="button" id="cancel-edit" class="btn btn-light w-100 mt-2">
+            Cancel
+        </button>
+    </div>
+   </div>
+
+
+        <!-- Record Sale -->
+       <div class="detail-card p-4 h-100">
+
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-cart-plus fs-5"></i>
+                <h5 class="fw-bold mb-0">Record Sale</h5>
+            </div>
+
+            <button type="button"
+                    id="show-sale-form"
+                    class="btn btn-success w-100">
+                Record Sale
+            </button>
+
+        <div id="sale-form-container" class="d-none mt-3" data-has-errors="{{ form1.errors|yesno:'true,false' }}">
+
+            <form method="POST"
+                action="{% url 'sales' product.id %}">
+
+                {% csrf_token %}
+
+                {{ form1.as_p }}
+
+                <button type="submit"
+                        class="btn btn-success w-100 mt-2">
+                    Confirm Sale
+                </button>
+
+            </form>
+
+            <button type="button"
+                    id="cancel-sale"
+                    class="btn btn-light w-100 mt-2">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+    </div>
+
+
+    <!-- Recent Sales -->
+    <div class="detail-card p-4 mb-4">
+
+        <div class="d-flex justify-content-between
+                    align-items-center mb-3">
+
+            <h5 class="fw-bold mb-0">Recent Sales</h5>
+
+            <span class="text-muted small">
+                Latest transactions
+            </span>
+
+        </div>
+
+        {% for sale in sales %}
+
+            <div class="d-flex justify-content-between
+                        align-items-center py-3 border-bottom">
+
+                <div>
+                    <p class="fw-semibold small mb-1">
+                        {{ sale.quantity }} units sold
+                    </p>
+
+                    <small class="text-muted">
+                        {{ sale.created_at|date:"M d, Y - h:i A" }}
+                    </small>
+                </div>
+
+                <span class="small fw-semibold">
+                    Sale #{{ sale.id }}
+                </span>
+
+            </div>
+
+        {% empty %}
+
+            <div class="text-center py-4">
+                <i class="bi bi-receipt fs-2 text-muted"></i>
+                <p class="text-muted small mt-2 mb-0">
+                    No sales recorded for this product yet.
+                </p>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- Danger Zone -->
+    <div class="detail-card p-4 mb-4">
+
+        <h6 class="fw-bold text-danger mb-2">
+            Danger Zone
+        </h6>
+
+        <p class="text-muted small">
+            Deactivate this product to remove it from your active inventory.
+        </p>
+
+        <form method="POST"
+              action="{% url 'delete' product.id %}">
+
+            {% csrf_token %}
+
+            <button type="submit"
+                    class="btn btn-outline-danger btn-sm">
+                Deactivate Product
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'stockup/details.js' %}"></script>
+{% endblock %}
