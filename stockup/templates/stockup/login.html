@@ -1,15 +1,120 @@
+
 {% extends "stockup/base.html" %}
 
+{% block title %}Login | Iventra{% endblock %}
 
-{%block content%}
-<h2>LogIN</h2>
-<div class="">
-  <form action="" method="post">
-    {% csrf_token %}
-    {{form}}
+{% block content %}
 
-    <button type="submit" class="btn">Submit</button>
-  </form>
+<style>
+    .auth-card {
+        width: 100%;
+        max-width: 430px;
+        background: #fff;
+        border: 1px solid #e9e9e9;
+        border-radius: 16px;
+        padding: 35px;
+    }
+
+    .auth-logo {
+        width: 46px;
+        height: 46px;
+        background: #171717;
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        margin-bottom: 18px;
+    }
+
+    .auth-card .form-control {
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .auth-btn {
+        background: #171717;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .auth-btn:hover {
+        background: #333;
+        color: white;
+    }
+</style>
+
+<div class="auth-card shadow-sm">
+
+    <div class="auth-logo">
+        <i class="bi bi-box-seam"></i>
+    </div>
+
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1">Welcome back</h3>
+        <p class="text-muted mb-0">
+            Sign in to manage your inventory.
+        </p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger small">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            <input
+                type="text"
+                name="username"
+                class="form-control"
+                placeholder="Enter your username"
+                value="{{ form.username.value|default:'' }}"
+                autocomplete="username"
+                required
+            >
+            {% for error in form.username.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <input
+                type="password"
+                name="password"
+                class="form-control"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+            >
+            {% for error in form.password.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn auth-btn w-100 mt-2">
+            Sign In
+        </button>
+    </form>
+
+    <div class="text-center mt-4">
+        <span class="text-muted small">Don't have an account?</span>
+        <a href="{% url 'register' %}"
+           class="text-dark fw-semibold text-decoration-none small">
+            Create an account
+        </a>
+    </div>
+
 </div>
 
-{%endblock%}
+{% endblock %}
+
+{% block script %}
+{% endblock %}

@@ -1,5 +1,5 @@
 {% extends "stockup/base.html" %}
-{% load static %}
+{% load static humanize %}
 
 {% block title %}Product Details | StockUp{% endblock %}
 
@@ -111,7 +111,7 @@
                         <span class="badge bg-danger-subtle text-danger">
                             Out of Stock
                         </span>
-                    {% elif is_low_stock %}
+                    {% elif product.quantity <= product.is_low_stock %}
                         <span class="badge bg-warning-subtle text-warning-emphasis">
                             Low Stock
                         </span>
@@ -127,7 +127,7 @@
             <div class="text-sm-end">
                 <p class="detail-label mb-1">Selling Price</p>
                 <h2 class="fw-bold mb-0">
-                    ₦{{ product.price|floatformat:2 }}
+                    ₦{{ product.price|floatformat:2| intcomma }}
                 </h2>
             </div>
 
@@ -144,7 +144,7 @@
                 <p class="detail-label mb-2">Available Stock</p>
 
                 <h2 class="detail-number mb-1">
-                    {{ product.quantity }}
+                    {{ product.quantity|intcomma }}
                 </h2>
 
                 <small class="text-muted">Units remaining</small>
@@ -156,7 +156,7 @@
                 <p class="detail-label mb-2">Low Stock Threshold</p>
 
                 <h2 class="detail-number mb-1">
-                    {{ product.is_low_stock }}
+                    {{ product.is_low_stock |intcomma }}
                 </h2>
 
                 <small class="text-muted">Minimum stock level</small>
@@ -184,7 +184,7 @@
         <div class="d-flex justify-content-between py-2 border-bottom">
             <span class="detail-label">Selling Price</span>
             <span class="small fw-medium">
-                ₦{{ product.price|floatformat:2 }}
+                ₦{{ product.price|floatformat:2 | intcomma }}
             </span>
         </div>
 
@@ -295,7 +295,7 @@
 
                 <div>
                     <p class="fw-semibold small mb-1">
-                        {{ sale.quantity }} units sold
+                        {{ sale.quantity | intcomma }} units sold
                     </p>
 
                     <small class="text-muted">

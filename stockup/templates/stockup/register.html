@@ -1,15 +1,168 @@
 {% extends "stockup/base.html" %}
 
+{% block title %}Create Account | Iventra{% endblock %}
 
-{%block content%}
-<h2>Register User</h2>
-<div class="">
-  <form action="" method="post">
-    {% csrf_token %}
-    {{form}}
+{% block content %}
 
-    <button type="submit" class="btn">Submit</button>
-  </form>
+<style>
+    .auth-card {
+        width: 100%;
+        max-width: 430px;
+        background: #fff;
+        border: 1px solid #e9e9e9;
+        border-radius: 16px;
+        padding: 35px;
+    }
+
+    .auth-logo {
+        width: 46px;
+        height: 46px;
+        background: #171717;
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        margin-bottom: 18px;
+    }
+
+    .auth-card .form-control {
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .auth-btn {
+        background: #171717;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .auth-btn:hover {
+        background: #333;
+        color: white;
+    }
+
+    .helptext {
+        display: block;
+        color: #777;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .errorlist {
+        color: #dc3545;
+        font-size: 13px;
+        padding-left: 18px;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="auth-card shadow-sm">
+
+    <div class="auth-logo">
+        <i class="bi bi-box-seam"></i>
+    </div>
+
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1">Create your account</h3>
+        <p class="text-muted mb-0">
+            Get started with managing your inventory.
+        </p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            <input
+                type="text"
+                name="username"
+                class="form-control"
+                placeholder="Choose a username"
+                value="{{ form.username.value|default:'' }}"
+                autocomplete="username"
+                required
+            >
+            {{ form.username.errors }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Business Name</label>
+            <input
+                type="text"
+                name="business_name"
+                class="form-control"
+                placeholder="Enter your business name"
+                value="{{ form.business_name.value|default:'' }}"
+                autocomplete="business_name"
+                required
+            >
+            
+            {{ form.business_name.errors }}
+        </div>
+
+
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Email</label>
+            <input
+                type="email"
+                name="email"
+                class="form-control"
+                placeholder="Enter your email address"
+                value="{{ form.email.value|default:'' }}"
+                autocomplete="email"
+                required
+            >
+             {{ form.email.errors }}
+            
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <input
+                type="password"
+                name="password1"
+                class="form-control"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                required
+            >
+            {{ form.password1.errors }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Confirm Password</label>
+            <input
+                type="password"
+                name="password2"
+                class="form-control"
+                placeholder="Confirm your password"
+                autocomplete="new-password"
+                required
+            >
+            {{ form.password2.errors }}
+        </div>
+
+        <button type="submit" class="btn auth-btn w-100 mt-2">
+            Create Account
+        </button>
+    </form>
+
+    <div class="text-center mt-4">
+        <span class="text-muted small">Already have an account?</span>
+        <a href="{% url 'login' %}"
+           class="text-dark fw-semibold text-decoration-none small">
+            Sign in
+        </a>
+    </div>
+
 </div>
 
-{%endblock%}
+{% endblock %}
+
+{% block script %}
+{% endblock %}

@@ -1,25 +1,240 @@
-
-  
 {% extends "stockup/base.html" %}
+{% load static %}
 
-{% block title %}Add Product{% endblock %}
+{% block title %}Add Product | Iventra{% endblock %}
+
+{% block header_actions %}
+<div class="mb-3">
+    <a href="{% url 'products' %}"
+       class="text-decoration-none text-secondary small">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Products
+    </a>
+</div>
+{% endblock %}
 
 {% block content %}
 
-<div class="container mt-4" >
 
-    <h2>Add New Product</h2>
+<style>
+    .create-wrapper {
+        max-width: 680px;
+        margin: 0 auto;
+    }
 
-    <form method="POST" action="{% url 'create'%}">
-        {% csrf_token %}
+    .create-card {
+        background: #fff;
+        border: 1px solid #e9ebee;
+        border-radius: 14px;
+    }
 
-        {{ form.as_p }}
+    .section-heading {
+        font-size: 15px;
+        font-weight: 650;
+        color: #252a31;
+    }
 
-        <button type="submit" class="btn btn-dark">
-            Save Product
-        </button>
-    </form>
+    .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #424951;
+        margin-bottom: 8px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 46px;
+        border-color: #e1e4e8;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #858c95;
+        box-shadow: 0 0 0 3px rgba(37, 42, 49, .08);
+    }
+
+    .form-text {
+        font-size: 12px;
+        color: #858c95;
+    }
+
+    .save-btn {
+        background: #252a31;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        min-height: 48px;
+        font-weight: 600;
+    }
+
+    .save-btn:hover {
+        background: #3b424b;
+        color: #fff;
+    }
+
+    .cancel-btn {
+        color: #626a74;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .cancel-btn:hover {
+        color: #252a31;
+    }
+
+    .section-divider {
+        border-top: 1px solid #eceef0;
+    }
+</style>
+
+<div class="create-wrapper">
+
+    <!-- Page heading -->
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1">Add Product</h3>
+        <p class="text-secondary small mb-0">
+            Add a new item to your inventory.
+        </p>
+    </div>
+
+    <!-- Form card -->
+    <div class="create-card p-3 p-sm-4">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <!-- Product Information -->
+            <div class="mb-4">
+
+                <h6 class="section-heading mb-3">
+                    <i class="bi bi-box-seam me-2"></i>
+                    Product Information
+                </h6>
+
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.product_name.id_for_label }}">
+                        Product Name
+                    </label>
+
+                    {{ form.product_name }}
+
+                    {% for error in form.product_name.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.category.id_for_label }}">
+                        Category
+                    </label>
+
+                    {{ form.category }}
+
+                    {% for error in form.category.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="{{ form.price.id_for_label }}">
+                            Selling Price (₦)
+                        </label>
+
+                        {{ form.price }}
+
+                        {% for error in form.price.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="{{ form.quantity.id_for_label }}">
+                            Initial Quantity
+                        </label>
+
+                        {{ form.quantity }}
+
+                        {% for error in form.quantity.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Stock Alert -->
+            <div class="section-divider pt-4 mb-4">
+
+                <h6 class="section-heading mb-1">
+                    <i class="bi bi-bell me-2"></i>
+                    Stock Alert
+                </h6>
+
+                <p class="text-secondary small mb-3">
+                    Choose when Iventra should flag this product as low stock.
+                </p>
+
+                <label class="form-label"
+                       for="{{ form.is_low_stock.id_for_label }}">
+                    Low Stock Threshold
+                </label>
+
+                {{ form.is_low_stock }}
+
+                <div class="form-text mt-2">
+                    You'll be alerted when available stock reaches this quantity.
+                </div>
+
+                {% for error in form.is_low_stock.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+
+            </div>
+
+            <!-- Actions -->
+            <div class="section-divider pt-4">
+
+                <button type="submit" class="btn save-btn w-100">
+                    <i class="bi bi-plus-lg me-2"></i>
+                    Save Product
+                </button>
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'products' %}" class="cancel-btn">
+                        Cancel
+                    </a>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
 
 </div>
 
-{% endblock %}            
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

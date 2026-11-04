@@ -1,33 +1,337 @@
+
+ 
 {% extends "stockup/base.html" %}
 {% load static %}
 
+{% block title %}Low Stock | Iventra{% endblock %}
 
-{%block content%}
- <h1> Low Stock Items</h1>
+{% block content %}
 
-    <!-- 1. Check if there are actually any low stock products -->
+<style>
+    .page-heading {
+        margin-bottom: 28px;
+    }
+
+    .summary-card,
+    .product-panel {
+        background: #fff;
+        border: 1px solid #e9eaec;
+        border-radius: 13px;
+    }
+
+    .summary-card {
+        padding: 20px;
+        height: 100%;
+    }
+
+    .summary-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .summary-number {
+        font-size: 27px;
+        font-weight: 700;
+        color: #171717;
+    }
+
+    .product-row {
+        padding: 17px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background .2s;
+    }
+
+    .product-row:last-child {
+        border-bottom: none;
+    }
+
+    .product-row:hover {
+        background: #fafafa;
+    }
+
+    .product-icon {
+        width: 42px;
+        height: 42px;
+        background: #f3f4f6;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #555;
+        flex-shrink: 0;
+    }
+
+    .stock-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .badge-low {
+        background: #fff4df;
+        color: #a16207;
+    }
+
+    .badge-out {
+        background: #feecec;
+        color: #dc2626;
+    }
+
+    .filter-btn {
+        border: 1px solid #e5e7eb;
+        background: white;
+        color: #555;
+        border-radius: 7px;
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .filter-btn.active {
+        background: #171717;
+        color: white;
+        border-color: #171717;
+    }
+
+    .search-box {
+        max-width: 320px;
+    }
+
+    .details-link {
+        color: #171717;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .details-link:hover {
+        color: #666;
+    }
+
+    @media (max-width: 576px) {
+        .product-row {
+            padding: 16px 13px;
+        }
+
+        .search-box {
+            max-width: 100%;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="page-heading">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h3 class="fw-bold mb-1">Low Stock</h3>
+            <p class="text-muted mb-0">
+                Keep track of products that need restocking.
+            </p>
+        </div>
+        <a href="{% url 'create' %}"
+           class="btn btn-dark btn-sm px-3">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Product
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-4">
+        <div class="summary-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted small">Products needing attention</span>
+                <div class="summary-icon"
+                     style="background:#fff4df;color:#a16207;">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+            <div class="summary-number">{{ total_low_stock }}</div>
+            <small class="text-muted">Total products to check</small>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="summary-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted small">Low stock</span>
+                <div class="summary-icon"
+                     style="background:#fff4df;color:#a16207;">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+            </div>
+            <div class="summary-number">{{ low_stock_count }}</div>
+            <small class="text-muted">Products below threshold or at it</small>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="summary-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted small">Out of stock</span>
+                <div class="summary-icon"
+                     style="background:#feecec;color:#dc2626;">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+            </div>
+            <div class="summary-number">{{ out_of_stock }}</div>
+            <small class="text-muted">Products with zero quantity</small>
+        </div>
+    </div>
+
+</div>
+
+<!-- Product List -->
+<div class="product-panel">
+
+    <div class="p-3 p-md-4 border-bottom">
+        <div class="d-flex flex-column flex-md-row
+                    justify-content-between gap-3">
+
+            <div>
+                <h5 class="fw-bold mb-1">Products to restock</h5>
+                <small class="text-muted">
+                    Review your stock levels and take action.
+                </small>
+            </div>
+
+            <input
+                type="search"
+                id="product-search"
+                class="form-control search-box"
+                placeholder="Search products..."
+            >
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="filter-btn active" data-filter="all">
+                All ({{ total_low_stock }})
+            </button>
+            <button class="filter-btn" data-filter="low">
+                Low Stock ({{ low_stock_count }})
+            </button>
+            <button class="filter-btn" data-filter="out">
+                Out of Stock ({{ out_of_stock }})
+            </button>
+        </div>
+    </div>
+
     {% if products %}
-        <table  cellpadding="10">
-            <thead>
-                <tr>
-                    <th>Product Name</th>
-                    <th>Current Quantity</th>
-                    <th>Low Stock Threshold</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 2. Loop through each low stock product -->
-                {% for product in products %}
-                    <tr>
-                        <td><strong>{{ product.product_name }}</strong></td>
-                        <td>{{ product.quantity }}</td>
-                        <td>{{ product.is_low_stock }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <div id="product-list">
+
+            {% for product in products %}
+
+                <div class="product-row"
+                     data-name="{{ product.product_name|lower }}"
+                     data-status="{% if product.quantity == 0 %}out{% else %}low{% endif %}">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="product-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+
+                        <div class="flex-grow-1 min-width-0">
+
+                            <div class="d-flex flex-wrap
+                                        align-items-center gap-2 mb-1">
+
+                                <span class="fw-semibold">
+                                    {{ product.product_name }}
+                                </span>
+
+                                {% if product.quantity == 0 %}
+                                    <span class="stock-badge badge-out">
+                                        Out of stock
+                                    </span>
+                                {% else %}
+                                    <span class="stock-badge badge-low">
+                                        Low stock
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                            <small class="text-muted">
+                                {{ product.get_category_display }}
+                            </small>
+
+                            <div class="d-flex flex-wrap gap-3 mt-2">
+                                <small class="text-muted">
+                                    Price:
+                                    <strong class="text-dark">
+                                        {{ product.price }}
+                                    </strong>
+                                </small>
+
+                                <small class="text-muted">
+                                    Available:
+                                    <strong class="text-dark">
+                                        {{ product.quantity }}
+                                    </strong>
+                                </small>
+
+                                <small class="text-muted">
+                                    Threshold:
+                                    <strong class="text-dark">
+                                        {{ product.is_low_stock }}
+                                    </strong>
+                                </small>
+                            </div>
+
+                        </div>
+
+                        <a href="{% url 'details' product.id %}"
+                           class="details-link text-nowrap">
+                            Details
+                            <i class="bi bi-arrow-up-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div id="empty-search" class="text-center py-5 d-none">
+            <i class="bi bi-search fs-2 text-muted"></i>
+            <p class="text-muted mt-2 mb-0">
+                No matching products found.
+            </p>
+        </div>
+
     {% else %}
-        <!-- 3. Fallback message if everything is fully stocked -->
-        <p>🎉 All items are well stocked! No low stock alerts.</p>
+
+        <div class="text-center py-5 px-3">
+            <div class="summary-icon mx-auto mb-3"
+                 style="background:#eaf7ef;color:#198754;width:55px;height:55px;">
+                <i class="bi bi-check-circle fs-4"></i>
+            </div>
+
+            <h5 class="fw-bold">You're all caught up!</h5>
+
+            <p class="text-muted mb-0">
+                None of your products currently need restocking.
+            </p>
+        </div>
+
     {% endif %}
-{%endblock%}
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'stockup/lowstock.js' %}"></script>
+{% endblock %}

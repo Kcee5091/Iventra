@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import User, Inventory, Sales
 from .forms import RegisterForm, LoginForm, IventoryForm, MakeSale, editForm
-from django.contrib.auth import login as auth_login, logout
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.http import JsonResponse
 from django.db import transaction
 from django.contrib import messages
@@ -24,7 +24,9 @@ def index(request):
     today = timezone.localdate()
     today_sales = Sales.objects.filter(product__owner=request.user, created_at__date=today)
     today_revenue = today_sales.aggregate(total=Sum(F("quantity") * F("price_per_item")) )["total"] or 0
-        
+    in_stock = Inventory.objects.filter(owner=request.user, is_active=True, quantity__gt=F("is_low_stock")).count()   
+    out_of_stock = Inventory.objects.filter(owner=request.user, is_active=True, quantity=0).count()
+    summary = products.aggregate(total_units=Sum('quantity'), inventory_value=Sum(F('quantity') * F('price')))
     recent_sales = history[:5]
     today_sales = today_sales.count()
    
@@ -33,7 +35,8 @@ def index(request):
                      {"products": products, "ivform":ivform,
                        "history":history, "low_stock":low_stock,
                        "total_product":total_product, "total_stocks":total_stocks, 
-                       "today_revenue":today_revenue, "today_sales":today_sales, "recent_sales": recent_sales})
+                       "today_revenue":today_revenue, "today_sales":today_sales, "recent_sales": recent_sales, "in_stock": in_stock, "out_of_stock": out_of_stock, "summary": summary,
+                       "total_units": summary['total_units'] or 0, "inventory_value": summary['inventory_value'] or 0 } )
 
 
 @login_required
@@ -54,7 +57,7 @@ def NewIventory(request):
 def IventoryDetails(request, product_id):
     product = get_object_or_404(Inventory, pk=product_id, owner=request.user)
     form1 = MakeSale()
-    form2 = editForm()
+    form2 = editForm(instance=product)
     sales = Sales.objects.filter(product=product).order_by("-created_at")[:5]
     low_stock = product.quantity <= product.is_low_stock
     
@@ -88,7 +91,7 @@ def sale_view(request, product_id):
               return redirect('details', product_id = product.id) 
     else: 
         form = MakeSale()
-    return render(request,"stockup/details.html", {"product": product } )
+    return render(request,"stockup/details.html", {"product": product, "form1": form} )
     
    
 @require_POST
@@ -102,8 +105,8 @@ def editIventory(request, product_id):
             form.save()
             return redirect('details', product_id=product.id)
     else:
-        form= editIventory(isinstance=product)
-    return render(request,"stockup/details.html", {"product": product } )    
+        form= editForm(instance=product)
+    return render(request,"stockup/details.html", {"product": product, "form2": form } )    
     
         
 @login_required
@@ -112,9 +115,21 @@ def product_list(request):
         owner=request.user,
         is_active=True
     ).order_by("-created_at")
+    total_product = products.count()
+    in_stock = Inventory.objects.filter(owner=request.user, is_active=True, quantity__gt=F("is_low_stock")).count()   
+    out_of_stock = Inventory.objects.filter(owner=request.user, is_active=True, quantity=0).count()
+    summary = products.aggregate(total_units=Sum('quantity'), inventory_value=Sum(F('quantity') * F('price')))
+    low_stock = Inventory.objects.filter(owner =request.user, is_active =True, quantity__lte=F("is_low_stock")).count()
+        
 
     return render(request, "stockup/products.html", {
-        "products": products
+        "products": products,
+        "in_stock": in_stock,
+        "out_of_stock": out_of_stock,
+        "total_product": total_product,
+        "total_stocks": summary['total_units'],
+        "inventory_value": summary['inventory_value'],
+        "low_stock": low_stock
     })                      
     
 
@@ -131,10 +146,11 @@ def deleteIventory(request, product_id):
 
 @login_required
 def low_stockView(request):
-    products = Inventory.objects.filter(owner=request.user, is_active=True, quantity__lte=F("is_low_stock"))
-    print(f"Low stock items found: {products.count()}")
-    return render(request, "stockup/lowstock.html", {"products": products})
+    products = Inventory.objects.filter(owner=request.user, is_active=True, quantity__lte=F("is_low_stock")).order_by("-created_at")
+    out_of_stock = products.filter(quantity=0).count()
+    low_stock_count = products.filter(quantity__gt=0).count()
     
+    return render(request, "stockup/lowstock.html", {"products": products, "out_of_stock": out_of_stock, "low_stock": low_stock_count, "total_low_stock": products.count()})
     
 
 
@@ -168,5 +184,5 @@ def loginView(request):
 
 
 def logoutView(request):
-    logout(request)
-    return redirect("index")
+    auth_logout(request)
+    return redirect("login")

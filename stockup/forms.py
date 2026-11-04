@@ -22,6 +22,34 @@ class IventoryForm(forms.ModelForm):
             "product_name","quantity","price","category","is_low_stock"
         ]
 
+        widgets = {
+                "product_name": forms.TextInput(attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g. Samsung Galaxy A15"
+                }),
+                "category": forms.Select(attrs={
+                    "class": "form-select"
+                }),
+                "price": forms.NumberInput(attrs={
+                    "class": "form-control",
+                    "placeholder": "0.00",
+                    "min": "0",
+                    "step": "0.01"
+                }),
+                "quantity": forms.NumberInput(attrs={
+                    "class": "form-control",
+                    "placeholder": "0",
+                    "min": "0",
+                    "step": "1"
+                }),
+                "is_low_stock": forms.NumberInput(attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g. 5",
+                    "min": "0",
+                    "step": "1"
+                }),
+            }     
+
 
 
 class MakeSale(forms.ModelForm):
@@ -38,3 +66,19 @@ class editForm(forms.ModelForm):
         fields = [
              "product_name","quantity","price","category","is_low_stock"
         ]
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        if quantity < 0:
+            raise forms.ValidationError("Quantity cannot be negative.")
+        return quantity    
+
+
+    def clean_price(self):
+            price = self.cleaned_data['price']
+            if price < 0:
+                raise forms.ValidationError("Price cannot be negative.")
+            return price    
+    
+
+    

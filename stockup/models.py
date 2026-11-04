@@ -11,11 +11,26 @@ class User(AbstractUser):
 
 
 class Inventory(models.Model):
+    category_choices = [ ("electronics", "Electronics"),
+
+            ("fashion", "Fashion"),
+
+            ("groceries", "Groceries"),
+
+            ("beauty", "Beauty & Personal Care"),
+
+            ("home", "Home & Kitchen"),
+
+            ("accessories", "Accessories"),
+
+            ("other", "Other"),
+
+    ]
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="products", null=True, blank=True)
     product_name = models.CharField(max_length=100)
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.CharField(max_length=50)
+    category = models.CharField(max_length=50, choices=category_choices)
     is_low_stock = models.PositiveIntegerField(default=5)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
