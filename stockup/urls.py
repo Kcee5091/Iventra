@@ -15,8 +15,9 @@ urlpatterns =[
     path("lowstock/", views.low_stockView, name = "lowstock"),
     path("products/", views.product_list, name="products"),
     path("record_sale/", views.record_sale, name="record_sale"),
-    
-          
+    path("load-more-sales/", views.load_more_sales, name="load_more_sales")
 
     
+    
+
 ]

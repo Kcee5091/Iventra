@@ -89,7 +89,41 @@
     .muted-text {
         color: #777;
         font-size: 0.85rem;
+
     }
+
+
+    #load-more-sales {
+        transition: all 0.25s ease;
+    }
+
+    #load-more-sales:hover {
+        transform: translateY(-2px);
+    }
+
+    #load-more-sales:disabled {
+        opacity: 0.65;
+        cursor: wait;
+}
+
+
+
+    /* Sales history entrance animation */
+        .sale-row {
+            animation: saleEnter 0.35s ease both;
+        }
+
+        @keyframes saleEnter {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
     @media (max-width: 576px) {
         .dashboard {
@@ -234,22 +268,24 @@
     </section>
 
 
-    <!-- Sales History -->
-    <section class="dashboard-section mb-4">
+<!-- Sales History -->
+<section class="dashboard-section mb-4" id="sales-history">
 
-        <div class="section-heading d-flex justify-content-between align-items-center">
+    <div class="section-heading d-flex justify-content-between align-items-center">
 
-            <div>
-                <h5 class="fw-bold mb-1">Sales History</h5>
+        <div>
+            <h5 class="fw-bold mb-1">Sales History</h5>
 
-                <p class="muted-text mb-0">
-                    View your complete sales records
-                </p>
-            </div>
-
-            <i class="bi bi-clock-history fs-3"></i>
-
+            <p class="muted-text mb-0">
+                View your complete sales records
+            </p>
         </div>
+
+        <i class="bi bi-clock-history fs-3"></i>
+
+    </div>
+
+    <div id="sales-history-list">
 
         {% for sale in history %}
 
@@ -266,7 +302,7 @@
             </div>
 
             <p class="mb-0 fw-semibold">
-                {{ sale.quantity | intcomma }} units
+                {{ sale.quantity|intcomma }} units
             </p>
 
         </div>
@@ -279,12 +315,41 @@
 
         {% endfor %}
 
-    </section>
+    </div>
+
+    {% if history.has_next %}
+    <div class="text-center mt-3" id="load-more-container">
+
+        <button
+            type="button"
+            class="btn btn-outline-success"
+            id="load-more-sales"
+            data-url="{% url 'load_more_sales' %}"
+            data-page="2"
+        >
+            Load More
+        </button>
+
+    </div>
+    {% endif %}
+
+    <p id="sales-end-message"
+       class="text-center text-secondary mt-3 d-none">
+        You've reached the end of your sales history.
+    </p>
+
+</section>
 
 
    
     
 
 </div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="{% static 'stockup/index.js' %}"></script>
 
 {% endblock %}

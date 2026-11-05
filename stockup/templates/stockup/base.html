@@ -314,7 +314,7 @@
                 Products
             </a>
 
-             <a href="{ % url 'record_sale' %}"
+             <a href="{% url 'record_sale' %}"
               class="nav-link-custom sale-nav-link {% if request.resolver_match.url_name == 'record_sale' %}active{% endif %}">
                 <i class="bi bi-plus-circle"></i>
                 Record Sale

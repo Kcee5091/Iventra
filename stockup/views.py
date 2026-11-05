@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import F, Sum
 from django.utils import timezone
+from django.core.paginator import Paginator
+from django.template.loader import render_to_string
 
 
 # Create your views here.
@@ -19,6 +21,8 @@ def index(request):
     products = Inventory.objects.filter(is_active=True, owner = request.user).order_by("-created_at")
     ivform = IventoryForm()
     history = Sales.objects.filter(product__owner=request.user).order_by("-created_at")
+    history_paginator = Paginator(history, 10)
+    history_page = history_paginator.get_page(1)
     low_stock = Inventory.objects.filter(owner =request.user, is_active =True, quantity__lte=F("is_low_stock")).count()
 
     total_product = products.count()
@@ -35,10 +39,30 @@ def index(request):
     return render(request,
                    "stockup/index.html",
                      {"products": products, "ivform":ivform,
-                       "history":history, "low_stock":low_stock,
+                       "history":history_page, "low_stock":low_stock,
                        "total_product":total_product, "total_stocks":total_stocks, 
                        "today_revenue":today_revenue, "today_sales":today_sales, "recent_sales": recent_sales, "in_stock": in_stock, "out_of_stock": out_of_stock, "summary": summary,
                        "total_units": summary['total_units'] or 0, "inventory_value": summary['inventory_value'] or 0 } )
+
+
+def load_more_sales(request):
+    history = Sales.objects.filter(product__owner=request.user).order_by('-created_at')
+    paginator = Paginator(history, 10)
+    page_number = request.GET.get("page", 2)
+    page_obj = paginator.get_page(page_number)
+
+    html = render_to_string("stockup/markup/sale_history_rows.html", {"sales": page_obj},request=request )
+
+    return JsonResponse({"html": html, "has_next": page_obj.has_next()})
+
+
+
+
+
+
+
+
+
 
 
 @login_required

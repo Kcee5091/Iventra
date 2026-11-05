@@ -1,0 +1,23 @@
+{% load  humanize %}
+
+
+{% for sale in sales %}
+<div class="sale-row d-flex justify-content-between align-items-center">
+
+    <div>
+        <h6 class="fw-semibold mb-1">
+            {{ sale.product.product_name }}
+        </h6>
+
+        <p class="muted-text mb-0">
+            {{ sale.created_at|date:"M d, Y - h:i A" }}
+        </p>
+    </div>
+
+    <p class="mb-0 fw-semibold">
+        {{ sale.quantity|intcomma }} units
+    </p>
+
+</div>
+{% endfor %}
+
