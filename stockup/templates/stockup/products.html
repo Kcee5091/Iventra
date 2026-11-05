@@ -410,7 +410,7 @@
 
             <div>
                 <h3 class="mb-1">Products</h3>
-                <p class="mb-0">Manage and monitor your inventory.</p>
+                <p class="mb-0">Manage your inventory.</p>
             </div>
 
             <a href="{% url 'create' %}" class="btn btn-dark px-3 py-2">
@@ -465,7 +465,7 @@
                 </div>
 
                 <div class="summary-number">
-                    ₦{{ inventory_value|floatformat:2 | intcomma }}
+                    ₦{{ inventory_value|floatformat:-0| intcomma }}
                 </div>
                 <div class="summary-note">Based on current selling prices</div>
             </div>
@@ -609,7 +609,7 @@
                                     <div class="metric-item">
                                         <div class="metric-label">Selling Price</div>
                                         <div class="metric-value metric-price">
-                                            ₦{{ product.price|floatformat:2|intcomma }}
+                                            ₦{{ product.price|floatformat:-0|intcomma }}
                                         </div>
                                     </div>
 

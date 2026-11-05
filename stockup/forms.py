@@ -81,4 +81,20 @@ class editForm(forms.ModelForm):
             return price    
     
 
-    
+
+class RecordSaleForm(forms.ModelForm):
+    product = forms.ModelChoiceField(
+        queryset=Inventory.objects.none()
+    )
+
+    class Meta:
+        model = Sales
+        fields = ["product", "quantity"]
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields["product"].queryset = Inventory.objects.filter(
+                owner=user,
+                is_active=True
+            )

@@ -1,7 +1,7 @@
 
  
 {% extends "stockup/base.html" %}
-{% load static %}
+{% load static humanize %}
 
 {% block title %}Low Stock | Iventra{% endblock %}
 
@@ -134,11 +134,7 @@
                 Keep track of products that need restocking.
             </p>
         </div>
-        <a href="{% url 'create' %}"
-           class="btn btn-dark btn-sm px-3">
-            <i class="bi bi-plus-lg me-1"></i>
-            Add Product
-        </a>
+        
     </div>
 </div>
 
@@ -168,7 +164,7 @@
                     <i class="bi bi-box-seam"></i>
                 </div>
             </div>
-            <div class="summary-number">{{ low_stock_count }}</div>
+            <div class="summary-number">{{ total_low_stock|intcomma }}</div>
             <small class="text-muted">Products below threshold or at it</small>
         </div>
     </div>
@@ -269,7 +265,7 @@
                                 <small class="text-muted">
                                     Price:
                                     <strong class="text-dark">
-                                        {{ product.price }}
+                                        {{ product.price| floatformat:-0| intcomma }}
                                     </strong>
                                 </small>
 

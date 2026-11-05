@@ -1,6 +1,8 @@
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import User, Inventory, Sales
-from .forms import RegisterForm, LoginForm, IventoryForm, MakeSale, editForm
+from .forms import RecordSaleForm, RegisterForm, LoginForm, IventoryForm, MakeSale, editForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.http import JsonResponse
 from django.db import transaction
@@ -47,7 +49,7 @@ def NewIventory(request):
             product= form.save(commit=False)
             product.owner = request.user
             product.save()
-            return redirect("index")
+            return redirect("details", product_id=product.id)
     else:
         form = IventoryForm()
     return render(request, "stockup/create.html", {"form":form})    
@@ -152,6 +154,42 @@ def low_stockView(request):
     
     return render(request, "stockup/lowstock.html", {"products": products, "out_of_stock": out_of_stock, "low_stock": low_stock_count, "total_low_stock": products.count()})
     
+
+
+@login_required
+def record_sale(request):
+    if request.method == "POST":
+        form = RecordSaleForm(request.POST, user=request.user)
+
+        if form.is_valid():
+            sale = form.save(commit=False)
+
+            product = sale.product
+
+            if sale.quantity > product.quantity:
+                form.add_error(
+                    "quantity",
+                    f"Only {product.quantity} units are available."
+                )
+            else:
+                sale.price_per_item = product.price
+                sale.save()
+
+                product.quantity -= sale.quantity
+                product.save()
+
+                return redirect("index")
+
+    else:
+        form = RecordSaleForm(user=request.user)
+        products = form.fields["product"].queryset
+        
+
+    return render(
+        request,
+        "stockup/record_sale.html",
+        {"form": form, "products": products}
+    )
 
 
 
