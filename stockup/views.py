@@ -112,6 +112,7 @@ def sale_view(request, product_id):
 
                   product.quantity -= sale_quantity
                   product.save()
+                  messages.success(request, "Sale recorded successfully")
                   
                   
               return redirect('details', product_id = product.id) 
